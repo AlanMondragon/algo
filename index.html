@@ -445,6 +445,50 @@
       padding: 10px 0 50px
     }
 
+    .paper {
+      cursor: pointer
+    }
+
+    .paper:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 4px
+    }
+
+    #player {
+      position: fixed;
+      right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      z-index: 6;
+      width: 200px;
+      display: none;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+      border: 1px solid rgba(255, 217, 160, .3);
+      background: #000
+    }
+
+    #player.on {
+      display: block
+    }
+
+    #player iframe {
+      display: block;
+      width: 200px;
+      height: 113px;
+      border: 0
+    }
+
+    #player a {
+      display: block;
+      padding: 6px 10px;
+      font-size: .78rem;
+      color: var(--gold);
+      text-align: center;
+      text-decoration: none;
+      background: var(--wine2)
+    }
+
     @media (prefers-reduced-motion:reduce) {
       * {
         animation: none !important;
@@ -486,10 +530,11 @@
 
   <section id="letter">
     <h2 class="d">Una carta para ti</h2>
-    <p class="lead">Léela despacito.</p>
-    <div class="paper">
+    <p class="lead">Léela despacito. Toca la carta para poner nuestra canción.</p>
+    <div class="paper" id="paper" role="button" tabindex="0" aria-label="Poner la canción">
       <p class="serif" id="txt" aria-live="off"></p>
     </div>
+    <div id="player" aria-label="Canción"></div>
   </section>
 
   <section id="why">
@@ -517,7 +562,7 @@
     /* ===== EDITA AQUÍ ===== */
     const NOMBRE = "Mi amor";                   // su nombre
     const DESDE = "2026-07-06T00:00:00";       // inicio de la relación
-    const FIRMA = "Alan de Agatita";                  // cómo firmas
+    const FIRMA = "Tu novio";                  // cómo firmas
     const CARTA = `Hola, mi vida.
 
 Hice esta página pensando en ti, porque quería decirte con algo especial lo mucho que significas para mí.
@@ -535,10 +580,10 @@ ${FIRMA}`;
       ["✨", "Cómo eres con todos", "Tu corazón es de lo más bonito que tienes."],
       ["💪", "Tu fuerza", "Me inspiras más de lo que te imaginas."],
       ["🥹", "Tus detalles", "Los pequeños, los que nadie ve."],
-      ["💞", "Todo de ti", "Aunque me faltaran palabras, te amo."]
+      ["💞", "Todo tú", "Aunque me faltaran palabras, te amo."]
     ];
     const PREGUNTA = "¿Pasamos una vida juntos?";
-    const ULTIMO = "Quiero pasar mi vida contigo.";
+    const ULTIMO = "Gracias por ser mi persona favorita.";
     /* ======================= */
 
     const $ = id => document.getElementById(id);
@@ -597,6 +642,18 @@ ${FIRMA}`;
         (function w() { if (i < CARTA.length) { c.insertAdjacentText('beforebegin', CARTA[i++]); setTimeout(w, /[.,\n]/.test(CARTA[i - 1]) ? 260 : 38); } else c.remove(); })();
       }
     }, { threshold: .4 }).observe($('letter'));
+
+    /* canción: arranca al tocar la carta (los navegadores exigen un toque para dar play) */
+    const SONG = "lcoqOPaBe9M";
+    let playing = false;
+    function playSong() {
+      if (playing) return; playing = true;
+      const p = $('player');
+      p.innerHTML = '<iframe src="https://www.youtube.com/embed/' + SONG + '?autoplay=1&loop=1&playlist=' + SONG + '&playsinline=1" title="Nuestra canción" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe><a href="https://www.youtube.com/watch?v=' + SONG + '" target="_blank" rel="noopener">Si no suena, ábrela aquí</a>';
+      p.classList.add('on');
+    }
+    $('paper').addEventListener('click', playSong);
+    $('paper').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playSong(); } });
 
     /* botón "No" que huye */
     const no = $('no'), box = $('btns');
